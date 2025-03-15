@@ -1,6 +1,7 @@
 const express = require('express');
+const serverless = require('serverless-http'); 
 const bodyParser = require('body-parser');
-const abc2svg = require('./lib/abc2svg/abc2svg-1.js');
+const abc2svg = require('../lib/abc2svg/abc2svg-1.js');
 
 // 1) Parse an attribute string like: key="value" key2="value2"
 function parseAttributes(attributeString) {
@@ -113,9 +114,6 @@ function combineSVGs(svgStr) {
   }
 
 const app = express();
-
-// We expect ABC notation as text data in the request body
-// If you'd like to parse JSON, you would use `app.use(express.json())`
 app.use(bodyParser.json());
 
 app.post('/render', (req, res) => {
@@ -137,7 +135,7 @@ app.post('/render', (req, res) => {
         return null;
     },
     errbld: function(sev, txt, fn, idx) {
-        var msg = sev + ' ' + clean_txt(txt)
+        var msg = sev + ' ' + txt
         console.log(msg);
     },
     img_out: function(str) {
@@ -163,7 +161,11 @@ app.post('/render', (req, res) => {
 });
 
 // Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
+// const port = process.env.PORT || 3000;
+// app.listen(port, () => {
+//   console.log(`Server listening on port ${port}`);
+// });
+
+// IMPORTANT: Export the Express app wrapped in serverless-http
+module.exports = app;
+module.exports.handler = serverless(app);
